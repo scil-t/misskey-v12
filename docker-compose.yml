@@ -2,7 +2,8 @@ version: "3"
 
 services:
   web:
-    build: .
+    # build: .
+    image: pz2or/misskey
     restart: always
     links:
       - db
@@ -19,7 +20,7 @@ services:
 
   redis:
     restart: always
-    image: redis:4.0-alpine
+    image: redis:alpine
     networks:
       - internal_network
     volumes:
@@ -27,7 +28,7 @@ services:
 
   db:
     restart: always
-    image: postgres:12.2-alpine
+    image: postgres:16-alpine
     networks:
       - internal_network
     env_file:
