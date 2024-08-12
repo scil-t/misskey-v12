@@ -10,7 +10,7 @@ RUN apt-get update
 RUN apt-get install -y build-essential
 RUN git submodule update --init
 RUN corepack enable
-RUN pnpm install --frozen-lockfile
+RUN pnpm install
 RUN pnpm run build
 RUN rm -rf .git
 
