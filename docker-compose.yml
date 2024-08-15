@@ -6,7 +6,7 @@ services:
     image: pz2or/misskey
     restart: always
     links:
-      - db
+      # - db
       - redis
 #      - es
     ports:
@@ -26,15 +26,15 @@ services:
     volumes:
       - ./redis:/data
 
-  db:
-    restart: always
-    image: postgres:16-alpine
-    networks:
-      - internal_network
-    env_file:
-      - .config/docker.env
-    volumes:
-      - ./db:/var/lib/postgresql/data
+  # db:
+  #   restart: always
+  #   image: postgres:16-alpine
+  #   networks:
+  #     - internal_network
+  #   env_file:
+  #     - .config/docker.env
+  #   volumes:
+  #     - ./db:/var/lib/postgresql/data
 
 #  es:
 #    restart: always

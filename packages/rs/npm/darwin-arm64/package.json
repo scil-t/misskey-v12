@@ -1,0 +1,18 @@
+{
+  "name": "misskey-v12-rs-darwin-arm64",
+  "version": "0.0.0",
+  "os": [
+    "darwin"
+  ],
+  "cpu": [
+    "arm64"
+  ],
+  "main": "misskey-v12-rs.darwin-arm64.node",
+  "files": [
+    "misskey-v12-rs.darwin-arm64.node"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">= 10"
+  }
+}
