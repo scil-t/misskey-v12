@@ -6,6 +6,7 @@ use chrono::Utc;
 use url::Url;
 use std::collections::HashMap;
 use rsa::{RsaPrivateKey, pkcs1::DecodeRsaPrivateKey, PaddingScheme, Hash};
+use rsa::errors::Error;
 
 #[napi(object)]
 pub struct PrivateKey {
@@ -52,29 +53,42 @@ pub fn create_signed_post(
         headers,
     };
 
-    let result = sign_to_request(&request, &key, vec!["(request-target)", "date", "host", "digest"]);
-
-    SignedRequest {
-        request,
-        signing_string: result.0,
-        signature: result.1,
-        signature_header: result.2,
+    match sign_to_request(&request, &key, vec!["(request-target)", "date", "host", "digest"]) {
+        Ok((signing_string, signature, signature_header)) => {
+            SignedRequest {
+                request,
+                signing_string,
+                signature,
+                signature_header,
+            }
+        }
+        Err(e) => panic!("Failed to sign the request: {:?}", e),
     }
 }
 
-fn sign_to_request(request: &Request, key: &PrivateKey, include_headers: Vec<&str>) -> (String, String, String) {
-    let signing_string = gen_signing_string(request, &include_headers);
-    let private_key = RsaPrivateKey::from_pkcs1_pem(&key.private_key_pem).unwrap();
-    let padding = PaddingScheme::PKCS1v15Sign { hash: Some(Hash::SHA2_256) };
-    let signature = base64_engine.encode(private_key.sign(padding, signing_string.as_bytes()).unwrap());
-    let signature_header = format!(
-        r#"keyId="{}",algorithm="rsa-sha256",headers="{}",signature="{}""#,
-        key.key_id,
-        include_headers.join(" "),
-        signature
-    );
 
-    (signing_string, signature, signature_header)
+fn sign_to_request(request: &Request, key: &PrivateKey, include_headers: Vec<&str>) -> Result<(String, String, String), Error> {
+	let signing_string = gen_signing_string(request, &include_headers);
+	
+	// PEMからRSA秘密鍵をデコード
+	let private_key = RsaPrivateKey::from_pkcs1_pem(&key.private_key_pem)?;
+
+	// 署名アルゴリズムとハッシュ関数の設定
+	let padding = PaddingScheme::new_pkcs1v15_sign(Some(Hash::SHA2_256));
+	
+	// 署名を生成
+	let signature = private_key.sign(padding, signing_string.as_bytes())?;
+	let encoded_signature = base64_engine.encode(signature);
+
+	// 署名ヘッダーの生成
+	let signature_header = format!(
+			r#"keyId="{}",algorithm="rsa-sha256",headers="{}",signature="{}""#,
+			key.key_id,
+			include_headers.join(" "),
+			encoded_signature
+	);
+
+	Ok((signing_string, encoded_signature, signature_header))
 }
 
 fn gen_signing_string(request: &Request, include_headers: &[&str]) -> String {
@@ -126,12 +140,15 @@ pub fn create_signed_get(key: PrivateKey, url: String, additional_headers: HashM
 			headers,
 	};
 
-	let (signing_string, signature, signature_header) = sign_to_request(&request, &key, vec!["(request-target)", "date", "host", "accept"]);
-
-	SignedRequest {
-			request,
-			signing_string,
-			signature,
-			signature_header,
+	match sign_to_request(&request, &key, vec!["(request-target)", "date", "host", "digest"]) {
+		Ok((signing_string, signature, signature_header)) => {
+				SignedRequest {
+						request,
+						signing_string,
+						signature,
+						signature_header,
+				}
+		}
+		Err(e) => panic!("Failed to sign the request: {:?}", e),
 	}
 }
