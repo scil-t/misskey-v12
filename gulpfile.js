@@ -10,18 +10,31 @@ const cssnano = require('gulp-cssnano');
 
 const locales = require('./locales');
 const meta = require('./package.json');
+const useClient = require('./useclient.js').useClient;
 
 gulp.task('copy:backend:views', () =>
 	gulp.src('./packages/backend/src/server/web/views/**/*').pipe(gulp.dest('./packages/backend/built/server/web/views'))
 );
 
-gulp.task('copy:client:fonts', () =>
-	gulp.src('./packages/client/node_modules/three/examples/fonts/**/*').pipe(gulp.dest('./built/_client_dist_/fonts/'))
-);
+gulp.task('copy:client:fonts', (done) => {
+	if (useClient == "client-sim") {
+			gulp.src('./packages/client-sim/node_modules/three/examples/fonts/**/*')
+					.pipe(gulp.dest('./built/_client_dist_/fonts/'))
+					.on('end', done);
+	} else if (useClient == "client") {
+			gulp.src('./packages/client/node_modules/three/examples/fonts/**/*')
+					.pipe(gulp.dest('./built/_client_dist_/fonts/'))
+					.on('end', done);
+	}
+});
 
-gulp.task('copy:client:tabler-icons', () =>
-	gulp.src('./packages/client/node_modules/@tabler/icons/iconfont/**/*').pipe(gulp.dest('./built/_client_dist_/tabler-icons/'))
-);
+gulp.task('copy:client:tabler-icons', (done) => {
+	gulp.src('./packages/client-sim/node_modules/@fortawesome/fontawesome-free/**/*')
+					.pipe(gulp.dest('./built/_client_dist_/fontawesome/'))
+	gulp.src('./packages/client/node_modules/@tabler/icons/iconfont/**/*')
+					.pipe(gulp.dest('./built/_client_dist_/tabler-icons/'))
+					.on('end', done);
+});
 
 gulp.task('copy:client:locales', cb => {
 	fs.mkdirSync('./built/_client_dist_/locales', { recursive: true });

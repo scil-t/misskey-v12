@@ -5,6 +5,7 @@ import { defineConfig } from 'vite';
 import locales from '../../locales';
 import meta from '../../package.json';
 import pluginJson5 from './vite.json5';
+import { useClient } from '../../useclient.js';
 
 const extensions = ['.ts', '.tsx', '.js', '.jsx', '.mjs', '.json', '.json5', '.svg', '.sass', '.scss', '.css', '.vue'];
 
@@ -63,7 +64,8 @@ export default defineConfig(({ command, mode }) => {
 				},
 			},
 			cssCodeSplit: true,
-			outDir: __dirname + '/../../built/_client_dist_',
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+			outDir: useClient === 'client-sim' ? './built' : __dirname + '/../../built/_client_dist_',
 			assetsDir: '.',
 			emptyOutDir: false,
 			sourcemap: process.env.NODE_ENV !== 'production',
