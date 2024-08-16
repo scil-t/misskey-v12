@@ -16,8 +16,6 @@ WORKDIR /misskey
 COPY . ./
 
 RUN apk add --no-cache ca-certificates git alpine-sdk g++ build-base cmake clang libressl-dev vips-dev python3
-RUN curl --proto '=https' --tlsv1.2 --silent --show-error --fail https://sh.rustup.rs | sh -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
 RUN corepack enable
 RUN pnpm install
 RUN pnpm build
