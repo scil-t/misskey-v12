@@ -15,6 +15,7 @@
 		"build-pre": "node ./scripts/build-pre.js",
 		"build": "pnpm build-pre && pnpm -r build && pnpm gulp",
 		"start": "cd packages/backend && node --experimental-json-modules ./built/index.js",
+		"docker:start": "pnpm migrate && pnpm start",
 		"start:test": "cd packages/backend && cross-env NODE_ENV=test node --experimental-json-modules ./built/index.js",
 		"init": "pnpm run migrate",
 		"migrate": "cd packages/backend && npx typeorm migration:run -d ormconfig.js",
